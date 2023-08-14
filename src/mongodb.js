@@ -29,6 +29,27 @@ const chatGroupSchema = new mongoose.Schema({
     }]
 })
 
+const chatMessageSchema = new mongoose.Schema({
+    chatGrpId : {
+        type: String,
+        required: true
+    },
+    user: {
+        type: LoginSchema, 
+        required: true
+    },
+    time: {
+        type: Date,
+        required: true
+    },
+    message: {
+        type: String,
+        required: true     
+    }
+})
+
 const userCollection = new mongoose.model("loginuserCollection",LoginSchema);
 const chatGroupCollection = new mongoose.model("ChatGroupCollection",chatGroupSchema);
-module.exports = {userCollection, chatGroupCollection};
+const chatMessageCollection = new mongoose.model("chatMessageCollection",chatMessageSchema)
+
+module.exports = {userCollection, chatGroupCollection, chatMessageCollection};

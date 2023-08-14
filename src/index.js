@@ -3,7 +3,11 @@ const app = express(); //start the express.js
 const path = require("path");
 const hbs = require("hbs");
 const templatePath = path.join(__dirname, "../templates");
-const {userCollection, chatGroupCollection } = require("./mongodb");
+const {
+  userCollection,
+  chatGroupCollection,
+  chatMessageCollection,
+} = require("./mongodb");
 var cors = require("cors");
 
 app.use(cors());
@@ -71,50 +75,119 @@ app.post("/login", async (req, res) => {
     } else {
       req.send("wrong password");
     }
-  } catch(err) {
-    console.log('err = ', err);
+  } catch (err) {
+    console.log("err = ", err);
     res.send("wrong details");
   }
 });
 
 app.post("/search-user", (req, res) => {
+  try {
+    const userName = req.body.name;
+    userCollection
+      .find({ name: { $regex: userName, $options: "i" } }) //partial search
+      .then((response) => {
+        res.json(response);
+      });
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post("/create-chat-group", async (req, res) => {
+  try {
+    const chatGroup = req.body.chatGroup;
+    await chatGroupCollection.insertMany([chatGroup]);
+    res.send("chatgroup created");
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/groups/:userId", async (req, res) => {
+  const userId = req.params.userId;
+  try {
+    const groups = await chatGroupCollection.find({ "users._id": userId });
+    res.send(groups);
+  } catch (err) {
+    res.status(500).json({ err: "Internal server error" });
+  }
+});
+
+app.delete("/groups/:groupId/users/:userId", async (req, res) => {
+  const groupId = req.params.groupId;
+  const userId = req.params.userId;
+  try {
+    const group = await chatGroupCollection.findById(groupId);
+    if (!group) return res.status(404).json({ error: "Group not found" });
+
+    const userIndex = group.users.findIndex(
+      (user) => user._id.toString() === userId
+    );
+    if (userIndex === -1) {
+      return res.status(404).json({ error: "User not found in the group" });
+    }
+    group.users.splice(userIndex, 1);
+    await group.save();
+
+    res.json({ message: "User removed from the group" });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.delete("/groups/:groupId", async (req, res) => {
+  const groupId = req.params.groupId;
+
+  try {
+    const group = await chatGroupCollection.findById(groupId);
+    if (!group) {
+      return res.status(404).json({ error: "Group not found" });
+    }
+    // if(!group.isAdmin) {
+    //     return res.status(403).json({error: 'user is not an admin of the group'});
+    // }
+
+    await chatGroupCollection.findByIdAndRemove(groupId);
+    res.json({ message: "Group deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post("/chat", async (req, res) => {
+  const data = {
+    chatGrpId: req.body.chatGrpId,
+    user: req.body.user,
+    time: req.body.time,
+    message: req.body.message,
+  };
+  console.log("data",data)
+  try {
+    chatMessageCollection
+      .insertMany([data])
+      .then(() => {
+        res.send({ message: "Chat message sent successfully" });
+      })
+      .catch((err) => {
+        res.send(err);
+        res.status(500).json({ error: "Cannot save" });
+      });
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/group/:groupId", (req,res) => {
+    const groupId = req.params.groupId;
     try {
-        const userName = req.body.name;
-        userCollection.find({ name: { $regex: userName, $options: "i" }}) //partial search
-        .then(response => {
-            res.json(response)
+        chatMessageCollection.find({"chatGrpId": groupId})
+        .then((chat) =>{
+            res.send(chat);
         })
     }
     catch(err) {
-        res.status(500).json({ error: "Internal server error" });
-    }
-});
-
-app.post("/create-chat-group",async (req,res) => {
-    try {
-        const chatGroup = req.body.chatGroup;
-        // console.log("cha->", chatGroup)
-
-        await chatGroupCollection.insertMany([chatGroup]);
-        res.send("chatgroup created")
-    }
-    catch(err) {
-        res.status(500).json({ error: "Internal server error" });
-    }
-})
-
-app.get("/groups/:userId",async (req, res)=>{
-    const userId = req.params.userId;
-    console.log("un->",userId);
-    try {
-        const groups =await chatGroupCollection.find({'users._id' : userId});
-        console.log("groups->",groups);
-        // const groupNames = groups.map(group => group.name);
-        // console.log("groupNames->",groupNames);
-        res.send(groups);
-    }
-    catch(err) {
-        res.status(500).json({ err: 'Internal server error' });
+        res.status(500).json({ err: "Internal server error"});
     }
 })
 
