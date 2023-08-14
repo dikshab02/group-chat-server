@@ -3,7 +3,7 @@ const app = express(); //start the express.js
 const path = require("path");
 const hbs = require("hbs");
 const templatePath = path.join(__dirname, "../templates");
-const collection = require("./mongodb");
+const {userCollection, chatGroupCollection } = require("./mongodb");
 var cors = require("cors");
 
 app.use(cors());
@@ -13,17 +13,9 @@ app.set("view engine", "hbs");
 app.set("views", templatePath);
 app.use(express.urlencoded({ extended: false }));
 
-// app.get('/', (req, res)=> {
-//     res.render("login"); //login.hbs
-// })
-
-// app.get('/signup', (req,res) => {
-//     res.render("signup");
-// })
-
 app.get("/getAll", (req, res) => {
   try {
-    collection
+    userCollection
       .find()
       .then((response) => {
         res.json(response);
@@ -33,7 +25,6 @@ app.get("/getAll", (req, res) => {
         res.status(500).json({ error: "Internal server error" });
       });
   } catch (err) {
-    console.error("Error fetching users:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -41,7 +32,7 @@ app.get("/getAll", (req, res) => {
 app.delete("/delete/:id", async (req, res) => {
   try {
     const userId = req.params.id;
-    const deletedUser = await collection.findByIdAndRemove(userId);
+    const deletedUser = await userCollection.findByIdAndRemove(userId);
 
     if (!deletedUser) {
       return res.status(400).json({
@@ -66,24 +57,66 @@ app.post("/signup", async (req, res) => {
     password: req.body.password,
   };
 
-  await collection.insertMany([data]);
+  await userCollection.insertMany([data]);
 
   res.send({ response: "home" });
 });
 
 app.post("/login", async (req, res) => {
   try {
-    const user = await collection.findOne({ name: req.body.name });
+    const user = await userCollection.findOne({ name: req.body.name });
 
     if (user.password === req.body.password) {
       res.send(user);
     } else {
       req.send("wrong password");
     }
-  } catch {
+  } catch(err) {
+    console.log('err = ', err);
     res.send("wrong details");
   }
 });
+
+app.post("/search-user", (req, res) => {
+    try {
+        const userName = req.body.name;
+        userCollection.find({ name: { $regex: userName, $options: "i" }}) //partial search
+        .then(response => {
+            res.json(response)
+        })
+    }
+    catch(err) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+app.post("/create-chat-group",async (req,res) => {
+    try {
+        const chatGroup = req.body.chatGroup;
+        // console.log("cha->", chatGroup)
+
+        await chatGroupCollection.insertMany([chatGroup]);
+        res.send("chatgroup created")
+    }
+    catch(err) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+})
+
+app.get("/groups/:userId",async (req, res)=>{
+    const userId = req.params.userId;
+    console.log("un->",userId);
+    try {
+        const groups =await chatGroupCollection.find({'users._id' : userId});
+        console.log("groups->",groups);
+        // const groupNames = groups.map(group => group.name);
+        // console.log("groupNames->",groupNames);
+        res.send(groups);
+    }
+    catch(err) {
+        res.status(500).json({ err: 'Internal server error' });
+    }
+})
 
 app.listen(3000, () => {
   console.log("port connected");

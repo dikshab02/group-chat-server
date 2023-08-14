@@ -18,5 +18,17 @@ const LoginSchema = new mongoose.Schema({
     }
 })
 
-const collection = new mongoose.model("LoginCollection",LoginSchema);
-module.exports = collection;
+const chatGroupSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    users: [{
+        type: LoginSchema,
+        required: true
+    }]
+})
+
+const userCollection = new mongoose.model("loginuserCollection",LoginSchema);
+const chatGroupCollection = new mongoose.model("ChatGroupCollection",chatGroupSchema);
+module.exports = {userCollection, chatGroupCollection};
