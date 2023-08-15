@@ -52,4 +52,4 @@ const userCollection = new mongoose.model("loginuserCollection",LoginSchema);
 const chatGroupCollection = new mongoose.model("ChatGroupCollection",chatGroupSchema);
 const chatMessageCollection = new mongoose.model("chatMessageCollection",chatMessageSchema)
 
-module.exports = {userCollection, chatGroupCollection, chatMessageCollection};
+module.exports = { userCollection, chatGroupCollection, chatMessageCollection };
