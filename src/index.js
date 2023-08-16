@@ -117,7 +117,7 @@ app.post("/create-chat-group", async (req, res) => {
   try {
     const chatGroup = req.body.chatGroup;
     await chatGroupCollection.insertMany([chatGroup]);
-    res.send("Chat group created");
+    res.send({ response: "Chat group created" });
   } catch (err) {
     res.status(500).json({ error: "Internal server error" });
   }
@@ -230,9 +230,9 @@ app.put("/group/:groupId", (req, res) => {
           group.name = chatgroup.name;
           group.users = chatgroup.users;
           group.save();
-          res.send('Group updated');
+          res.send({ response: "Group updated" });
         } else {
-            res.status(400).json({ error : 'Group not found'});
+          res.status(400).json({ error: "Group not found" });
         }
       })
       .catch((err) => {
