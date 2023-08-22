@@ -1,5 +1,3 @@
-require('dotenv').config();
-
 const EXPRESS = require("express"); //require the express.js
 const APP = EXPRESS(); //start the express.js
 const PORT = 3000;

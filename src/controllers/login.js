@@ -6,14 +6,23 @@ module.exports = {
             LoginCollection
               .find()
               .then((response) => {
-                res.json(response);
+                res.json({
+                  isError: false,
+                  message: '',
+                  data: response
+                });
               })
-              .catch((err) => {
-                console.error("Error fetching users:", err);
-                res.status(500).json({ error: "Internal server error" });
+              .catch((error) => {
+                res.status(500).json({ 
+                  isError: true,
+                  message: "Failed to load users",
+                  data: error });
               });
-          } catch (err) {
-            res.status(500).json({ error: "Internal server error" });
+          } catch (error) {
+            res.status(500).json({ 
+              isError: true,
+              message: "Internal server error",
+              data: error });
           }
     },
     deleteUser: (req,res) => { //api to delete user
@@ -23,17 +32,22 @@ module.exports = {
             .then((deletedUser)=>{
                 if (!deletedUser) {
                     return res.status(400).json({
+                      isError: true,
                       message: "There is no user with this id",
+                      data: ''
                     });
                   }
                   return res.status(200).json({
+                    isError: false,
                     message: "user deleted successfully..",
                     data: deletedUser,
                   });
             });
-          } catch (err) {
+          } catch (error) {
             return res.status(400).json({
+              isError: true,
               message: "Something went wrong, try again",
+              data: error
             });
           }
     },
@@ -44,31 +58,49 @@ module.exports = {
             LoginCollection
             .findByIdAndUpdate(userId, { name: newName })
             .then((response) => {
-              res.send(response);
+              res.send({
+                isError: false,
+                message: '',
+                data: response
+              })
               if (!res) {
-                return res.status(400).json({ error: "User not found" });
+                return res.status(400).json({ 
+                  isError: true,
+                  message: "User not found",
+                  data: '' });
               }
             })
-            .catch((err) => {
-              res.status(500).json({ err: "Failed to execute query" });
+            .catch((error) => {
+              res.status(500).json({ 
+                isError: true,
+                message: "Failed to execute query",
+                data: error });
             });
-        } catch (err) {
-          res.status(500).json({ err: "Internal server error" });
+        } catch (error) {
+          res.status(500).json({ 
+            isError: true,
+            message: "Internal server error",
+            data: error });
         }
     },
     registration: (req,res) => { //api for registration
-      console.log('body = ', req.body)
         const data = {
             name: req.body.name,
             password: req.body.password,
           };
           LoginCollection.create(data)
           .then(() =>{
-            res.send({ response: "home" });
+            res.send({ 
+              isError: false,
+              message: "Registered successfully",
+              data: '' });
           })
           .catch((error)=>{
-            console.log('Error = ', error)
-            res.status(500).json({ error: "Failed to register" });
+            res.status(500).json({ 
+              isError: true,
+              message: "Failed to register",
+              data: error
+             });
           });
          
     },
@@ -77,13 +109,26 @@ module.exports = {
             LoginCollection.findOne({ name: req.body.name })
             .then((user) =>{
                 if (user.password === req.body.password) {
-                    res.send(user);
-                  } else {
-                    req.send("wrong password");
+          
+                    res.send({
+                      isError: false,
+                      message:'',
+                      data: user
+                    })
+                  } else {           
+                    res.send({
+                      isError: true,
+                      message:'wrong password',
+                      data: ''
+                    })
                   }
             });
-          } catch (err) {
-            res.send("wrong details");
+          } catch (error) {
+            res.send({
+              isError: true,
+              message:'wrong details',
+              data: error
+            })
           }
     },
     searchUser: (req,res) => {  //api to search registered user
@@ -92,10 +137,17 @@ module.exports = {
               LoginCollection
                 .find({ name: { $regex: userName, $options: "i" } }) //partial search
                 .then((response) => {
-                  res.json(response);
+                  res.json({
+                    isError: false,
+                    message:'',
+                    data: response
+                  })
                 });
-            } catch (err) {
-              res.status(500).json({ error: "Internal server error" });
+            } catch (error) {
+              res.status(500).json({ 
+                isError: true,
+                message: "Internal server error",
+                data: error });
             }
     }
 }

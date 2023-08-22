@@ -1,4 +1,4 @@
-const CREATECHATGROUP_CONTROLLER = require("../controllers/create-chat-group");
+const CREATECHATGROUP_CONTROLLER = require('../controllers/create-chat-group');
 
 module.exports = (APP) => {
   APP.post("/create-chat-group", CREATECHATGROUP_CONTROLLER.createChatGroup);

@@ -12,24 +12,39 @@ module.exports = {
             chatMessageCollection
               .insertMany([data])
               .then(() => {
-                res.send({ message: "Chat message sent successfully" });
+                res.send({ 
+                  isError: false,
+                  message: "Chat message sent successfully",
+                  data: '' });
               })
-              .catch((err) => {
-                res.send(err);
-                res.status(500).json({ error: "Cannot save" });
+              .catch((error) => {
+                res.status(500).json({ 
+                  isError: true,
+                  message: "Cannot save",
+                  data: error });
               });
-          } catch (err) {
-            res.status(500).json({ error: "Internal server error" });
+          } catch (error) {
+            res.status(500).json({ 
+              isError: true,
+              message: "Internal server error",
+              data: error });
           }
     },
     getAllMessage: (req,res) => {  //api for getting all message for chat group
         const groupId = req.params.groupId;
         try {
           chatMessageCollection.find({ chatGrpId: groupId }).then((chat) => {
-            res.send(chat);
+            res.send({
+              isError: false,
+              message: '',
+              data: chat
+            });
           });
-        } catch (err) {
-          res.status(500).json({ err: "Internal server error" });
+        } catch (error) {
+          res.status(500).json({ 
+            isError: true,
+            message: "Internal server error",
+            data: error });
         }
     }
 }

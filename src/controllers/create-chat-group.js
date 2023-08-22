@@ -1,19 +1,27 @@
 const chatGroupCollection = require('mongoose').model('ChatGroupCollection');
 module.exports = {
-    createChatGroup: (req, res) => { //api to create a chat group
+    createChatGroup: (req, res) => { //api to save chat group
         try {
             const chatGroup = req.body.chatGroup;
             chatGroupCollection.insertMany([chatGroup])
-            .then((cg)=>{
-                res.send({ response: "Chat group created" });
+            .then(()=>{
+                res.send({ 
+                  isError: false,
+                  message: "Chat group created",
+                  data: '' });
             })
-            .catch((err)=> {
-                res.send(err);
-                res.status(500).json({ error: "Chat group not created" });
+            .catch((error)=> {
+                res.status(500).json({ 
+                  isError: true,
+                  message: "Chat group not created",
+                  data: error });
             });
             
-          } catch (err) {
-            res.status(500).json({ error: "Internal server error" });
+          } catch (error) {
+            res.status(500).json({ 
+              isError: true,
+              message: "Internal server error",
+              data: error });
           }
     },
     updateChatGroup: (req,res) => {  //api to update chat group
@@ -27,16 +35,29 @@ module.exports = {
                 group.name = chatgroup.name;
                 group.users = chatgroup.users;
                 group.save();
-                res.send({ response: "Group updated" });
+                res.send({ 
+                  isError: false,
+                  message: "Group updated",
+                  data: '' 
+                });
               } else {
-                res.status(400).json({ error: "Group not found" });
+                res.status(400).json({
+                  isError: true,
+                  message: "Group not found",
+                  data: '' });
               }
             })
-            .catch((err) => {
-              res.status(500).json({ err: "Failed to execute query" });
+            .catch((error) => {
+              res.status(500).json({ 
+                isError: true,
+                message: "Failed to execute query",
+                data: error });
             });
-        } catch (err) {
-          res.status(500).json({ err: "Internal server error" });
+        } catch (error) {
+          res.status(500).json({ 
+            isError: true,
+            message: "Internal server error",
+            data: error });
         }
     },
     getAll: (req, res) => { //get all chat groups for a given user
@@ -44,13 +65,24 @@ module.exports = {
         try {
           chatGroupCollection.find({ "users._id": userId })
           .then((groups) =>{
-            res.send(groups);
+            res.send({
+              isError: false,
+              message: '',
+              data: groups
+            });
           })
-          .catch((err) => {
-                res.status(500).json({ err: "failed to get chat groups for a given user"})
+          .catch((error) => {
+                res.status(500).json({ 
+                  isError: true,
+                  message: "failed to get chat groups for a given user",
+                  data: error
+                })
           });   
-        } catch (err) {
-          res.status(500).json({ err: "Internal server error" });
+        } catch (error) {
+          res.status(500).json({ 
+            isError: true,
+            message: "Internal server error",
+            data: error });
         }
     },
     leaveGroup: (req,res) => { //api to leave group
@@ -59,23 +91,38 @@ module.exports = {
         try {
           chatGroupCollection.findById(groupId)
           .then((group) =>{
-            if (!group) return res.status(404).json({ error: "Group not found" });
+            if (!group) return res.status(404).json({ 
+              isError: true,
+              message: "Group not found",
+              data: '' });
       
             const userIndex = group.users.findIndex(
               (user) => user._id.toString() === userId
             );
             if (userIndex === -1) {
-              return res.status(404).json({ error: "User not found in the group" });
+              return res.status(404).json({ 
+                isError: true,
+                message: "User not found in the group",
+                data: '' });
             }
             group.users.splice(userIndex, 1);
             group.save();
-            res.json({ message: "User removed from the group" });
+            res.json({ 
+              isError: false,
+              message: "User removed from the group",
+              data: '' });
           })
-          .catch((err) => {
-            res.status(500).json({err: "Failed to leave the group"})
+          .catch((error) => {
+            res.status(500).json({
+              isError: true,
+              message: "Failed to leave the group",
+              data: error})
           });
         } catch (error) {
-          res.status(500).json({ error: "Internal server error" });
+          res.status(500).json({ 
+            isError: true,
+            message: "Internal server error",
+            data: error });
         }
     },
     deleteGroup: (req,res) => { //api to delete group by admin
@@ -84,27 +131,48 @@ module.exports = {
           chatGroupCollection.findById(groupId)
           .then((group) => {
             if (!group) {
-                return res.status(404).json({ error: "Group not found" });
+                return res.status(404).json({ 
+                  isError: true,
+                  message: "Group not found",
+                  data: '' 
+                });
               }
               chatGroupCollection.findByIdAndRemove(groupId);
-              res.json({ message: "Group deleted successfully" });
+              res.json({ 
+                isError: false,
+                message: "Group deleted successfully",
+                data: '' 
+              });
           })
-          .catch((err) => {
-            res.status(500).json({err: "Failed to delete the group"})
+          .catch((error) => {
+            res.status(500).json({
+              isError: true,
+              message: "Failed to delete the group",
+              data: error})
           });
 
-        } catch (err) {
-          res.status(500).json({ error: "Internal server error" });
+        } catch (error) {
+          res.status(500).json({ 
+            isError: true,
+            message: "Internal server error",
+            data: error });
         }
     },
     getChatGroupInfo: (req,res) => {  //api for getting chat group info
       const groupId = req.params.groupId;
       try {
         chatGroupCollection.findById(groupId).then((chat) => {
-          res.send(chat);
+          res.send({
+            isError: false,
+            message: '',
+            data: chat
+          });
         });
-      } catch (err) {
-        res.status(500).json({ err: "Internal server error" });
+      } catch (error) {
+        res.status(500).json({ 
+          isError: true,
+          message: "Internal server error",
+          data: error });
       }
     }
 }
