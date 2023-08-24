@@ -105,6 +105,10 @@ module.exports = {
          
     },
     login: (req,res) => {
+      req.session.loggedInUser = 'someuser';
+      console.log("\nsess 0 ",req.session);
+      console.log("sess 0 ",req.session.id);
+      // req.session.save();
         try {
             LoginCollection.findOne({ name: req.body.name })
             .then((user) =>{
