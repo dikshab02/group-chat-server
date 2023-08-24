@@ -20,14 +20,14 @@ module.exports = {
               .catch((error) => {
                 res.status(500).json({ 
                   isError: true,
-                  message: "Cannot save",
-                  data: error });
+                  message: "Failed to save chat message",
+                  data: error.message });
               });
           } catch (error) {
             res.status(500).json({ 
               isError: true,
               message: "Internal server error",
-              data: error });
+              data: error.message });
           }
     },
     getAllMessage: (req,res) => {  //api for getting all message for chat group
@@ -47,7 +47,45 @@ module.exports = {
           res.status(500).json({ 
             isError: true,
             message: "Internal server error",
-            data: error });
+            data: error.message });
         }
+    },
+    likeChatMessage: (req,res) => { //api to like message
+      const messageId = req.params.messageId;
+      const userId =  req.body.userId;
+      try {
+        chatMessageCollection.findById(messageId)
+        .then((message) => {
+            if(!message)
+            {
+              return res.status(404).json({
+                isError: true,
+                message: 'Message not found',
+                data: ''
+              })
+            }
+            const likedIndex = message.likedByUsers.indexOf(userId);
+            if(likedIndex === -1){
+              message.likedByUsers.push(userId);
+            }
+            else
+            {
+              message.likedByUsers.splice(likedIndex,1);
+            }
+            message.save();
+            res.status(200).json({
+              isError: false,
+              message: likedIndex === -1 ? 'Message liked successfully' : 'Message unliked successfully',
+              data: userId
+            })
+        })
+      }
+      catch(error) {
+        res.send({
+          isError: true,
+          message: 'Internal server error',
+          data: error.message
+        })
+      }
     }
 }

@@ -1,8 +1,11 @@
 const MONGOOSE = require("mongoose");
 const { loginSchema } = require("./Login");
+const STRING = MONGOOSE.Schema.Types.String;
+const DATE = MONGOOSE.Schema.Types.Date;
+
 const chatMessageSchema = new MONGOOSE.Schema({
   chatGrpId: {
-    type: String,
+    type: STRING,
     required: true,
   },
   user: {
@@ -10,13 +13,17 @@ const chatMessageSchema = new MONGOOSE.Schema({
     required: true,
   },
   time: {
-    type: Date,
+    type: DATE,
+    default: Date.now,
     required: true,
   },
   message: {
-    type: String,
+    type: STRING,
     required: true,
   },
+  likedByUsers: [{
+    type: STRING
+  }]
 });
 
 const CHATMESSAGE = new MONGOOSE.model(
