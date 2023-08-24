@@ -1,11 +1,13 @@
 const MONGOOSE = require("mongoose");
+const STRING = MONGOOSE.Schema.Types.String;
+
 const loginSchema = new MONGOOSE.Schema({
     name: {
-        type: String,
+        type: STRING,
         required: true
     },
     password: {
-        type: String,
+        type: STRING,
         required: true
     }
 })

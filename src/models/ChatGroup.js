@@ -1,8 +1,10 @@
 const MONGOOSE = require("mongoose");
 const { loginSchema } = require("./Login");
+const STRING = MONGOOSE.Schema.Types.String;
+
 const chatGroupSchema = new MONGOOSE.Schema({
   name: {
-    type: String,
+    type: STRING,
     required: true,
   },
   users: [

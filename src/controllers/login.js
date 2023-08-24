@@ -74,13 +74,13 @@ module.exports = {
               res.status(500).json({ 
                 isError: true,
                 message: "Failed to execute query",
-                data: error });
+                data: error.message });
             });
         } catch (error) {
           res.status(500).json({ 
             isError: true,
             message: "Internal server error",
-            data: error });
+            data: error.message });
         }
     },
     registration: (req,res) => { //api for registration
@@ -99,7 +99,7 @@ module.exports = {
             res.status(500).json({ 
               isError: true,
               message: "Failed to register",
-              data: error
+              data: error.message
              });
           });
          
@@ -109,7 +109,6 @@ module.exports = {
             LoginCollection.findOne({ name: req.body.name })
             .then((user) =>{
                 if (user.password === req.body.password) {
-          
                     res.send({
                       isError: false,
                       message:'',
@@ -127,7 +126,7 @@ module.exports = {
             res.send({
               isError: true,
               message:'wrong details',
-              data: error
+              data: error.message
             })
           }
     },
@@ -147,7 +146,7 @@ module.exports = {
               res.status(500).json({ 
                 isError: true,
                 message: "Internal server error",
-                data: error });
+                data: error.message });
             }
     }
 }
