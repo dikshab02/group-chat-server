@@ -60,7 +60,7 @@ module.exports = {
                 message: 'Message not found',
                 data: ''
               })
-            }
+            } 
             const likedIndex = message.likedByUsers.indexOf(userId);
             if(likedIndex === -1){
               message.likedByUsers.push(userId);
