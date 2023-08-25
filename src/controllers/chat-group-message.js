@@ -31,9 +31,6 @@ module.exports = {
           }
     },
     getAllMessage: (req,res) => {  //api for getting all message for chat group
-      const sessionName = req.session;
-      console.log("\nsess",sessionName)
-      console.log("sess",req.session.id)
         const groupId = req.params.groupId;
         try {
           chatMessageCollection.find({ chatGrpId: groupId }).then((chat) => {
@@ -63,7 +60,7 @@ module.exports = {
                 message: 'Message not found',
                 data: ''
               })
-            }
+            } 
             const likedIndex = message.likedByUsers.indexOf(userId);
             if(likedIndex === -1){
               message.likedByUsers.push(userId);
